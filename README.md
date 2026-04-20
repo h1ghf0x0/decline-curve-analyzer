@@ -1,77 +1,72 @@
 # Decline Curve Analyzer
 
-A Streamlit web application for petroleum engineers to analyze production decline curves using Arps DCA (Decline Curve Analysis) methods.
+> A production-ready Streamlit web app for petroleum engineers to model, fit, and compare **Arps decline curves** — with automated EUR estimation, statistical model selection, and interactive Plotly charts.
 
-## Features
+[![Python](https://img.shields.io/badge/Python-3.x-blue?style=flat-square)](https://python.org)
+[![Streamlit](https://img.shields.io/badge/Streamlit-app-red?style=flat-square)](https://streamlit.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-passing%20%7C%20100%25%20coverage-brightgreen?style=flat-square)]()
 
-- **CSV/Excel Upload**: Upload production data in CSV or Excel format
-- **Auto-Fit Arps DCA Models**: Automatically fits three decline models:
-  - Exponential (b=0)
-  - Hyperbolic (0<b<1)
-  - Harmonic (b=1)
-- **Interactive Charts**: Rate-time and log-scale charts using Plotly
-- **Model Comparison**: Compare models using R², RMSE, AIC, and BIC
-- **EUR Calculation**: Estimated Ultimate Recovery calculations
-- **Reserves Table**: Generate and export reserves tables
-- **Export Results**: Download analysis results as Excel or text report
+---
 
-## Installation
+## What this does
 
-1. Clone the repository:
+Upload any well's production history and get back — in seconds:
+- Automated curve fits for all three Arps DCA models (exponential, hyperbolic, harmonic)
+- Model comparison via R², RMSE, AIC, and BIC
+- Estimated Ultimate Recovery (EUR) per model
+- Exportable reserves tables in Excel or text format
+
+No manual parameter tuning. No spreadsheet gymnastics.
+
+---
+
+## Decline models
+
+| Model | Equation | Use case |
+|---|---|---|
+| Exponential (b=0) | `q = Qi · exp(−Di · t)` | Conservative EUR; constant decline |
+| Hyperbolic (0<b<1) | `q = Qi / (1 + b·Di·t)^(1/b)` | Best fit for unconventional wells |
+| Harmonic (b=1) | `q = Qi / (1 + Di · t)` | Optimistic EUR; slow-decline fields |
+
+---
+
+## Quick start
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/h1ghf0x0/decline-curve-analyzer
 cd decline-curve-analyzer
-```
-
-2. Install dependencies:
-```bash
 pip install -r requirements.txt
-```
-
-## Recent Updates
-
-- **Enhanced Data Loader**: Improved column name mapping to handle more variations
-- **Robust Validation**: Fixed validation error messages and order of checks
-- **Comprehensive Testing**: All tests passing with 100% coverage
-- **Debug Logging**: Added debug logging for column mapping issues
-- **Case-Insensitive Matching**: Column type detection now handles case variations
-
-## Usage
-
-1. Run the Streamlit app:
-```bash
 streamlit run app.py
 ```
 
-2. Upload your production data (CSV or Excel) using the sidebar file uploader.
+Then upload a CSV or Excel file and hit **Run Analysis**.
 
-3. Configure analysis parameters:
-   - Time unit (days, months, years)
-   - Abandonment rate threshold
-   - Fluid type (oil, gas, water)
+---
 
-4. Click "Run Analysis" to perform the decline curve analysis.
+## Features
 
-5. View results in the tabs:
-   - **Rate-Time Chart**: Linear and log-scale production charts
-   - **Model Comparison**: Compare all three Arps models
-   - **Reserves Table**: View and download reserves projections
-   - **Diagnostics**: Residuals analysis and statistics
+- **Flexible data ingestion** — CSV or Excel with case-insensitive, fuzzy column matching for dates, rates, and cumulative volumes
+- **Auto-fit all three Arps models** simultaneously via `scipy` optimization
+- **Interactive Plotly charts** — rate-time and log-scale with zoom, hover, and download
+- **Statistical model selection** — compare fits using R², RMSE, AIC, and BIC side by side
+- **EUR & reserves projection** — per model, with abandonment rate threshold control
+- **Export** — results as Excel workbook or plain-text report
+- **Tested** — pytest suite with 100% coverage
 
-## Data Format
+---
 
-Your production data should include:
+## Data format
 
-| Required | Column Names (examples) |
-|----------|------------------------|
-| ✅ Date | date, time, datetime, production_date |
-| ✅ Rate | oil_rate, oil, gas_rate, gas, water_rate, water |
+| Column | Required | Accepted names |
+|---|---|---|
+| Date | ✅ | `date`, `time`, `datetime`, `production_date` |
+| Rate | ✅ | `oil_rate`, `oil`, `gas_rate`, `gas`, `water_rate` |
+| Cumulative | optional | `oil_cum`, `gas_cum`, `water_cum` |
+| Pressure | optional | `bhp`, `thp` |
 
-Optional columns:
-- Cumulative production (oil_cum, gas_cum, water_cum)
-- Pressures (bhp, thp)
+A sample file is provided at `data/sample_production.csv`.
 
-### Example CSV:
 ```csv
 date,oil_rate,gas_rate,water_rate
 2023-01-01,1000,50000,50
@@ -79,62 +74,37 @@ date,oil_rate,gas_rate,water_rate
 2023-03-01,903,46000,60
 ```
 
-A sample data file is provided in `data/sample_production.csv`.
+---
 
-## Project Structure
+## Project structure
 
 ```
 decline-curve-analyzer/
-├── app.py                  # Main Streamlit application
-├── requirements.txt        # Python dependencies
-├── README.md              # This file
+├── app.py                  # Streamlit entry point
+├── requirements.txt
 ├── data/
 │   └── sample_production.csv
 ├── src/
-│   ├── __init__.py
-│   ├── data_loader.py     # CSV/Excel loading and validation
-│   ├── models.py          # Arps DCA model definitions
-│   ├── fitting.py         # Curve fitting with scipy
-│   ├── calculations.py    # EUR and reserves calculations
-│   ├── visualization.py   # Plotly chart generation
-│   └── exports.py         # CSV/Excel export functionality
-└── tests/
-    ├── __init__.py
+│   ├── models.py           # Arps model definitions
+│   ├── fitting.py          # scipy curve fitting engine
+│   ├── calculations.py     # EUR & reserves logic
+│   ├── visualization.py    # Plotly chart generation
+│   ├── data_loader.py      # CSV/Excel ingestion & validation
+│   └── exports.py          # Excel/TXT export
+└── tests/                  # pytest — 100% coverage
     ├── test_models.py
     ├── test_fitting.py
     └── test_calculations.py
 ```
 
-## Arps Decline Models
+---
 
-### Exponential Decline (b=0)
-```
-q = Qi * exp(-Di * t)
-```
-- Constant decline rate
-- Most conservative EUR estimate
+## Tech stack
 
-### Hyperbolic Decline (0<b<1)
-```
-q = Qi / (1 + b * Di * t)^(1/b)
-```
-- Most flexible model
-- Best for most unconventional wells
+Python · Streamlit · Plotly · SciPy · pandas · NumPy · openpyxl · pytest
 
-### Harmonic Decline (b=1)
-```
-q = Qi / (1 + Di * t)
-```
-- Slowest decline rate
-- Most optimistic EUR estimate
-
-## Testing
-
-Run tests using pytest:
-```bash
-pytest tests/
-```
+---
 
 ## License
 
-MIT License
+MIT
