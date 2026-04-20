@@ -241,46 +241,10 @@ def fit_arps_model_with_statistics(model_name: str, time: np.ndarray, rate: np.n
     result['statistical_summary'] = statistical_summary
 
     return result
-    """
-    Fit an Arps DCA model to production data and calculate statistical metrics.
 
-    Args:
-        model_name: Name of the model ('exponential', 'hyperbolic', 'harmonic')
-        time: Time array (must be in consistent units)
-        rate: Production rate array
-        initial_guess: Optional dictionary with initial parameter guesses
-        q_abandon: Economic abandonment rate threshold
-        time_unit: Time unit for calculations
 
-    Returns:
-        Dictionary containing:
-            - model_name: Name of the fitted model
-            - parameters: Fitted parameters (Qi, Di, b if applicable)
-            - perr: Parameter estimation errors
-            - r_squared: Coefficient of determination
-            - rmse: Root mean squared error
-            - residuals: Residuals array
-            - fitted_rate: Fitted rate values at data points
-            - success: Whether the fit converged
-            - message: Fit status message
-            - statistical_summary: Comprehensive statistical analysis
-    """
-    # First fit the model
-    result = fit_arps_model(model_name, time, rate, initial_guess)
-
-    if not result['success']:
-        return result
-
-    # Calculate statistical summary
-    from .calculations import calculate_statistical_decline_summary
-    statistical_summary = calculate_statistical_decline_summary(
-        result, q_abandon, time_unit
-    )
-
-    # Add statistical summary to results
-    result['statistical_summary'] = statistical_summary
-
-    return result
+def fit_arps_model_original(model_name: str, time: np.ndarray, rate: np.ndarray,
+                            initial_guess: Optional[Dict] = None) -> Dict[str, Any]:
     """
     Fit an Arps DCA model to production data.
     

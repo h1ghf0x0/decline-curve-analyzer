@@ -304,11 +304,15 @@ def run_analysis(df, rate_column, time_unit, q_abandon):
 
         # Fit all models with statistical analysis
         fitting_results = {}
+        statistical_summary = {}
         for model_name in ARPS_MODELS.keys():
-            fitting_results[model_name] = fit_arps_model_with_statistics(
+            result = fit_arps_model_with_statistics(
                 model_name, time_valid, rate_valid,
                 q_abandon=q_abandon, time_unit=time_unit
             )
+            fitting_results[model_name] = result
+            if 'statistical_summary' in result:
+                statistical_summary[model_name] = result['statistical_summary']
 
         # Add information criteria
         fitting_results = add_information_criteria(fitting_results, len(time_valid))
@@ -337,6 +341,7 @@ def run_analysis(df, rate_column, time_unit, q_abandon):
         return {
             'processed_data': processed_df,
             'fitting_results': fitting_results,
+            'statistical_summary': statistical_summary,
             'best_model': best_model,
             'metrics': metrics,
             'reserves_table': reserves_table,
@@ -522,12 +527,6 @@ def display_results(results, rate_column, time_unit):
 
         stats_df = pd.DataFrame(stats_data)
         st.dataframe(stats_df.round(4), use_container_width=True)
-
-    with tab4:
-        st.subheader("Residuals Analysis")
-
-        fig_residuals = create_residuals_chart(fitting_results)
-        st.plotly_chart(fig_residuals, use_container_width=True, key=f"residuals-{st.session_state.selected_model}")
 
     with tab5:
         st.subheader("Statistical Analysis")
